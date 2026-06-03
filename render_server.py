@@ -27,10 +27,10 @@ def home():
 
 @app.route('/logo/<email_id>/<recipient>')
 def track_logo(email_id, recipient):
+    # Track the open
     conn = sqlite3.connect(DB)
     c    = conn.cursor()
     now  = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    # Only count once per email_id+recipient
     c.execute("SELECT id FROM events WHERE email_id=? AND recipient=? AND event_type='open'",
               (email_id, recipient))
     if not c.fetchone():
@@ -41,6 +41,13 @@ def track_logo(email_id, recipient):
                   (now, email_id, recipient))
     conn.commit()
     conn.close()
+
+    # Serve actual logo if exists
+    logo_path = os.path.join(os.path.dirname(__file__), 'logo.jpg')
+    if os.path.exists(logo_path):
+        return send_file(logo_path, mimetype='image/jpeg')
+
+    # Fallback: 1x1 transparent pixel
     px = bytes([71,73,70,56,57,97,1,0,1,0,128,0,0,255,255,255,0,0,0,
                 33,249,4,0,0,0,0,0,44,0,0,0,0,1,0,1,0,0,2,2,68,1,0,59])
     return send_file(io.BytesIO(px), mimetype='image/gif')
