@@ -77,6 +77,19 @@ def get_events():
 def ping():
     return jsonify({"status":"ok"})
 
+@app.route('/test')
+def test():
+    conn = sqlite3.connect(DB)
+    c    = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM events")
+    total = c.fetchone()[0]
+    conn.close()
+    return f"""<html><body style='font-family:Arial;text-align:center;padding:60px;background:#f0f8ff'>
+    <h2 style='color:#0078d4'>&#10003; Email Tracker Server Running!</h2>
+    <p><b>Total tracking events:</b> {total}</p>
+    <p style='color:green'><b>Render server is working!</b></p>
+    </body></html>"""
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
